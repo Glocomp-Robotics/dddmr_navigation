@@ -411,12 +411,14 @@ void ImageProjection::projectPointCloud() {
       }
     }
     */
+    cv::Mat colorImage;
+    cv::cvtColor(projected_image, colorImage, cv::COLOR_GRAY2BGR);
     std::string timestamp;
     std::stringstream ss;
     ss << _seg_msg.header.stamp.sec << "_" << std::setw(9) << std::setfill('0') << _seg_msg.header.stamp.nanosec;
     timestamp = ss.str();
     std::string file_name = mapping_dir_string_ + "/" + timestamp + ".png";
-    cv::imwrite(file_name, projected_image);
+    cv::imwrite(file_name, colorImage);
     last_save_depth_img_time_ = imge_time;
   }
 
