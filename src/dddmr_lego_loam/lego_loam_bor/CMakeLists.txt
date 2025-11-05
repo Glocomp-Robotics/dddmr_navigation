@@ -65,6 +65,7 @@ include_directories(
   include
   ${PCL_INCLUDE_DIRS}
   ${GTSAM_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 # opt_icp_gn
@@ -247,55 +248,81 @@ ament_target_dependencies(lego_loam_bag_lidar2depthimg_node
 
 #--- Everything below require CUDA ---
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "cmake")
-add_subdirectory(src/yolo/yolo_trt/tensorrt-cpp-api)
+#Check yolo build flag
+if(NOT TRT_ENABLED)
+    set(TRT_ENABLED OFF CACHE BOOL "Enable or disable TensorRT")
+endif()
 
-add_library(YoloV8_TRT SHARED src/yolo/yolo_trt/yolov8.cpp)
-target_link_libraries(YoloV8_TRT PUBLIC tensorrt_cpp_api ${OpenCV_LIBRARIES})
-target_include_directories(YoloV8_TRT PUBLIC src/yolo/yolo_trt/tensorrt-cpp-api/src)
+if(TRT_ENABLED)
+  message(STATUS "TensorRT is enabled. Compiling TensorRT and Yolo")
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "cmake")
+  add_subdirectory(src/yolo/yolo_trt/tensorrt-cpp-api)
 
-#yolo ros2 test node
-add_executable(yolo_ros2_image_sub
-  src/utils/yolo_ros2_image_sub.cpp
-)
-target_link_libraries(yolo_ros2_image_sub 
-  ${OpenCV_LIBRARIES}
-  YoloV8_TRT
-)
-ament_target_dependencies(yolo_ros2_image_sub
-  ${dependencies}
-)
+  add_library(YoloV8_TRT SHARED src/yolo/yolo_trt/yolov8.cpp)
+  target_link_libraries(YoloV8_TRT PUBLIC tensorrt_cpp_api ${OpenCV_LIBRARIES})
+  target_include_directories(YoloV8_TRT PUBLIC src/yolo/yolo_trt/tensorrt-cpp-api/src)
 
-# yolo lego loam ip
-add_library(yolo_image_projection SHARED
-  src/yolo/yoloImageProjection.cpp
-)
-target_link_libraries(yolo_image_projection
-  ${PCL_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-  YoloV8_TRT
-)
-ament_target_dependencies(yolo_image_projection
-  ${dependencies}
-)
+  #yolo ros2 test node
+  add_executable(yolo_ros2_image_sub
+    src/utils/yolo_ros2_image_sub.cpp
+  )
+  target_link_libraries(yolo_ros2_image_sub 
+    ${OpenCV_LIBRARIES}
+    YoloV8_TRT
+  )
+  ament_target_dependencies(yolo_ros2_image_sub
+    ${dependencies}
+  )
 
-#lego loam yolo bag node
-add_executable(lego_loam_yolo_bag
-  src/yolo/lego_loam_yolo_bag_node.cpp
-)
-target_link_libraries(lego_loam_yolo_bag 
-  interactive_pose_graph_editor
-  yolo_image_projection
-  feature_association
-  map_optimization
-  gtsam
-  YoloV8_TRT
-)
-ament_target_dependencies(lego_loam_yolo_bag
-  ${dependencies}
-)
+  # yolo lego loam ip
+  add_library(yolo_image_projection SHARED
+    src/yolo/yoloImageProjection.cpp
+  )
+  target_link_libraries(yolo_image_projection
+    ${PCL_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    YoloV8_TRT
+  )
+  ament_target_dependencies(yolo_image_projection
+    ${dependencies}
+  )
 
-# --- Everything CUDA finish here ---
+  #lego loam yolo bag node
+  add_executable(lego_loam_yolo_bag
+    src/yolo/lego_loam_yolo_bag_node.cpp
+  )
+  target_link_libraries(lego_loam_yolo_bag 
+    interactive_pose_graph_editor
+    yolo_image_projection
+    feature_association
+    map_optimization
+    gtsam
+    YoloV8_TRT
+  )
+  ament_target_dependencies(lego_loam_yolo_bag
+    ${dependencies}
+  )
+
+  install(TARGETS
+    YoloV8_TRT
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+  )
+
+  #install node
+  install(TARGETS
+    yolo_ros2_image_sub
+    lego_loam_yolo_bag
+    RUNTIME DESTINATION lib/${PROJECT_NAME}
+  )
+
+  ament_export_libraries(YoloV8_TRT)
+  # --- Everything CUDA finish here ---
+
+else()
+    message(STATUS "TensorRT is disabled.")
+endif()
 
 install(TARGETS
   opt_icp_gn
@@ -318,8 +345,6 @@ install(TARGETS
   pointcloud2occupancy
   optimized_icp_gn_playground
   lego_loam_bag_lidar2depthimg_node
-  yolo_ros2_image_sub
-  lego_loam_yolo_bag
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -337,6 +362,6 @@ install(DIRECTORY
 )
 
 ament_export_include_directories(include)
-ament_export_libraries(opt_icp_gn image_projection feature_association map_optimization pose_graph_editor interactive_pose_graph_editor YoloV8_TRT)
+ament_export_libraries(opt_icp_gn image_projection feature_association map_optimization pose_graph_editor interactive_pose_graph_editor)
 ament_export_dependencies(${dependencies})
 ament_package()
