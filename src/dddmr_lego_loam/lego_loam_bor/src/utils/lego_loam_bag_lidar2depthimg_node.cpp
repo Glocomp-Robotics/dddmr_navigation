@@ -167,12 +167,6 @@ int main(int argc, char** argv) {
     if(BR->pause_mapping_){
       rclcpp::spin_some(BR);
       rclcpp::spin_some(IPGE);
-      if(BR->save_current_map_){
-        std::shared_ptr<std_srvs::srv::Empty::Request> request;
-        std::shared_ptr<std_srvs::srv::Empty::Response> response;
-        MO->pcdSaver(request, response);
-        BR->save_current_map_ = false;
-      }
       continue;
     }
     

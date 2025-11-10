@@ -442,7 +442,9 @@ void ImageProjection::projectPointCloud() {
     std::stringstream ss;
     ss << _seg_msg.header.stamp.sec << "_" << std::setw(9) << std::setfill('0') << _seg_msg.header.stamp.nanosec;
     timestamp = ss.str();
-    std::string file_name = mapping_dir_string_ + "/" + timestamp + ".png";
+    std::string res;
+    res = std::to_string(_vertical_scans) + "x" + std::to_string(_horizontal_scans);
+    std::string file_name = mapping_dir_string_ + "/" + timestamp + "_" + res + ".png";
     cv::imwrite(file_name, colorImage);
     last_save_depth_img_time_ = imge_time;
   }
