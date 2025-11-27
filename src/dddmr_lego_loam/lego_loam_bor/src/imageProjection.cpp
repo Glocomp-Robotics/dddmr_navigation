@@ -350,7 +350,7 @@ void ImageProjection::cloudHandler(
 void ImageProjection::projectPointCloud() {
   
   //cv image
-  cv::Mat projected_image(_vertical_scans, _horizontal_scans, CV_8UC1, cv::Scalar(0));
+  cv::Mat projected_image(_vertical_scans, _horizontal_scans, CV_8UC3, cv::Scalar(0,0,0));
   
   // range image projection
   const size_t cloudSize = _laser_cloud_in->points.size();
@@ -380,13 +380,11 @@ void ImageProjection::projectPointCloud() {
     //  continue;
     //}
 
-    int columnIdn = -round((horizonAngle) / _ang_resolution_X) + _horizontal_scans * 0.5;
+    int viscolumnIdn = -round((horizonAngle) / _ang_resolution_X) + _horizontal_scans * 0.5 + _horizontal_scans * 0.25;
+    if(viscolumnIdn>=_horizontal_scans)
+      viscolumnIdn = viscolumnIdn - _horizontal_scans;
 
-    if (columnIdn >= _horizontal_scans){
-      columnIdn -= _horizontal_scans;
-    }
-
-    if (columnIdn < 0 || columnIdn >= _horizontal_scans){
+    if (viscolumnIdn < 0 || viscolumnIdn >= _horizontal_scans){
       continue;
     }
 
@@ -394,20 +392,30 @@ void ImageProjection::projectPointCloud() {
       continue;
     }
 
-    _range_mat(rowIdn, columnIdn) = range;
+    _range_mat(rowIdn, viscolumnIdn) = range;
     
     //@ generate projected_image
     //@ the rowIdn for _range_mat is from top to bottom, which means the line 0 is the first row
     //@ to visualize the depth image more intuitively, we make line 0 to the last rowIdn
     // for columnIdn, we need to rotate it 180 degree
-    int viscolumnIdn = -round((horizonAngle) / _ang_resolution_X) + _horizontal_scans * 0.5 + _horizontal_scans * 0.25;
-    if(viscolumnIdn>=_horizontal_scans)
-      viscolumnIdn = viscolumnIdn - _horizontal_scans;
-    if(rowIdn>0 && rowIdn<=_vertical_scans && viscolumnIdn<_horizontal_scans && viscolumnIdn>=0)
-      projected_image.at<unsigned char>(_vertical_scans-rowIdn, viscolumnIdn) = static_cast<unsigned char>(range*51);
+    //int viscolumnIdn = -round((horizonAngle) / _ang_resolution_X) + _horizontal_scans * 0.5 + _horizontal_scans * 0.25;
+    //if(viscolumnIdn>=_horizontal_scans)
+    //  viscolumnIdn = viscolumnIdn - _horizontal_scans;
+    if(rowIdn>0 && rowIdn<=_vertical_scans && viscolumnIdn<_horizontal_scans && viscolumnIdn>=0){
+      //projected_image.at<unsigned char>(_vertical_scans-rowIdn, viscolumnIdn) = static_cast<unsigned char>(range*51);
 
-    thisPoint.intensity = (float)rowIdn + (float)columnIdn / 10000.0;
-    size_t index = columnIdn + rowIdn * _horizontal_scans;
+      uint16_t scaled_int = static_cast<uint16_t>(range*100);
+      // 2. Split the 16-bit integer into high and low bytes
+      uint8_t high_byte = (uint8_t)(scaled_int >> 8);
+      uint8_t low_byte = (uint8_t)(scaled_int & 0xFF);
+
+      projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[0] = high_byte;
+      projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[1] = low_byte;
+      projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[2] = 0;
+
+    }
+    thisPoint.intensity = (float)rowIdn + (float)viscolumnIdn / 10000.0;
+    size_t index = viscolumnIdn + rowIdn * _horizontal_scans;
     _full_cloud->points[index] = thisPoint;
     // the corresponding range of a point is saved as "intensity"
     _full_info_cloud->points[index] = thisPoint;
@@ -416,7 +424,7 @@ void ImageProjection::projectPointCloud() {
 
   cv_bridge::CvImage img_bridge;
   img_bridge.image = projected_image;
-  img_bridge.encoding = sensor_msgs::image_encodings::TYPE_8UC1;
+  img_bridge.encoding = sensor_msgs::image_encodings::TYPE_8UC3;
   sensor_msgs::msg::Image::SharedPtr msg = img_bridge.toImageMsg();
   _pub_projected_image->publish(*msg);
 
@@ -436,8 +444,6 @@ void ImageProjection::projectPointCloud() {
       }
     }
     */
-    cv::Mat colorImage;
-    cv::cvtColor(projected_image, colorImage, cv::COLOR_GRAY2BGR);
     std::string timestamp;
     std::stringstream ss;
     ss << _seg_msg.header.stamp.sec << "_" << std::setw(9) << std::setfill('0') << _seg_msg.header.stamp.nanosec;
@@ -445,7 +451,7 @@ void ImageProjection::projectPointCloud() {
     std::string res;
     res = std::to_string(_vertical_scans) + "x" + std::to_string(_horizontal_scans);
     std::string file_name = mapping_dir_string_ + "/" + timestamp + "_" + res + ".png";
-    cv::imwrite(file_name, colorImage);
+    cv::imwrite(file_name, projected_image);
     last_save_depth_img_time_ = imge_time;
   }
 

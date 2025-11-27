@@ -360,7 +360,7 @@ void YoloImageProjection::projectPointCloud() {
   
   //cv image
   range_mat_removing_moving_object_ = cv::Mat::zeros(_vertical_scans, _horizontal_scans, CV_8UC1); 
-  cv::Mat projected_image(_vertical_scans, _horizontal_scans, CV_8UC1, cv::Scalar(0));
+  cv::Mat projected_image(_vertical_scans, _horizontal_scans, CV_8UC3, cv::Scalar(0,0,0));
   
   // range image projection
   const size_t cloudSize = _laser_cloud_in->points.size();
@@ -407,7 +407,6 @@ void YoloImageProjection::projectPointCloud() {
       continue;
     }
 
-
     if (range < _minimum_detection_range || range > _maximum_detection_range){
       continue;
     }
@@ -421,8 +420,20 @@ void YoloImageProjection::projectPointCloud() {
     //int viscolumnIdn = -round((horizonAngle) / _ang_resolution_X) + _horizontal_scans * 0.5 + _horizontal_scans * 0.25;
     //if(viscolumnIdn>=_horizontal_scans)
     //  viscolumnIdn = viscolumnIdn - _horizontal_scans;
-    if(rowIdn>0 && rowIdn<=_vertical_scans && viscolumnIdn<_horizontal_scans && viscolumnIdn>=0)
-      projected_image.at<unsigned char>(_vertical_scans-rowIdn, viscolumnIdn) = static_cast<unsigned char>(range*51);
+    if(rowIdn>0 && rowIdn<=_vertical_scans && viscolumnIdn<_horizontal_scans && viscolumnIdn>=0){
+      //projected_image.at<unsigned char>(_vertical_scans-rowIdn, viscolumnIdn) = static_cast<unsigned char>(range*51);
+
+      uint16_t scaled_int = static_cast<uint16_t>(range*100);
+      // 2. Split the 16-bit integer into high and low bytes
+      uint8_t high_byte = (uint8_t)(scaled_int >> 8);
+      uint8_t low_byte = (uint8_t)(scaled_int & 0xFF);
+
+      projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[0] = high_byte;
+      projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[1] = low_byte;
+      projected_image.at<cv::Vec3b>(_vertical_scans-rowIdn, viscolumnIdn)[2] = 0;
+
+    }
+      
 
     thisPoint.intensity = (float)rowIdn + (float)viscolumnIdn / 10000.0;
     size_t index = viscolumnIdn + rowIdn * _horizontal_scans;
@@ -432,14 +443,11 @@ void YoloImageProjection::projectPointCloud() {
     _full_info_cloud->points[index].intensity = range;
   }
 
-
-  cv::Mat colorImage;
-  cv::cvtColor(projected_image, colorImage, cv::COLOR_GRAY2BGR);
   // Run inference
-  const auto objects = yolov8_->detectObjects(colorImage);
+  const auto objects = yolov8_->detectObjects(projected_image);
 
   // Draw the bounding boxes on the image
-  yolov8_->drawObjectLabels(colorImage, objects);
+  yolov8_->drawObjectLabels(projected_image, objects);
 
   // Remove object from projected_image
   cv::Mat full_sized_mask = cv::Mat::zeros(projected_image.size(), CV_8UC1);
@@ -464,7 +472,7 @@ void YoloImageProjection::projectPointCloud() {
   _pub_projected_image->publish(*msg);
 
   cv_bridge::CvImage img_annotated;
-  img_annotated.image = colorImage;
+  img_annotated.image = projected_image;
   img_annotated.encoding = sensor_msgs::image_encodings::TYPE_8UC3;
   sensor_msgs::msg::Image::SharedPtr ros2_annotated_img = img_annotated.toImageMsg();
   pub_annotated_img_->publish(*ros2_annotated_img);
