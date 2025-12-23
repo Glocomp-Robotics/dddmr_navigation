@@ -394,15 +394,12 @@ void ImageProjection::projectPointCloud() {
       continue;
     }
 
-    float horizonAngle = std::atan2(thisPoint.x, thisPoint.y);
+    float horizonAngle = std::atan2(thisPoint.y, thisPoint.x);
 
     int viscolumnIdn = -round((horizonAngle) / _ang_resolution_X) + _horizontal_scans * 0.5;
 
     if(viscolumnIdn>=_horizontal_scans)
       viscolumnIdn = viscolumnIdn - _horizontal_scans;
-    else{
-      viscolumnIdn = _horizontal_scans - viscolumnIdn;
-    }
 
     if (viscolumnIdn < 0 || viscolumnIdn >= _horizontal_scans){
       continue;
