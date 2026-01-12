@@ -452,6 +452,8 @@ void Local_Planner::getBestTrajectory(std::string traj_gen_name, base_trajectory
   double minimum_cost = 9999999;
   geometry_msgs::msg::PoseArray accepted_pose_arr;
   pcl::PointCloud<pcl::PointXYZ> cuboids_pcl;
+  
+  rejected_trajectories_.clear();
 
   for(auto traj_it=trajectories_->begin();traj_it!=trajectories_->end();traj_it++){
 
@@ -466,7 +468,14 @@ void Local_Planner::getBestTrajectory(std::string traj_gen_name, base_trajectory
       trajectory2posearray_cuboids((*traj_it), accepted_pose_arr, cuboids_pcl);
     }
 
+    rejected_trajectories_[(*traj_it).rejected_by_].push_back(*traj_it);
+    
   }
+  
+  for(auto report_it=rejected_trajectories_.begin(); report_it!=rejected_trajectories_.end(); report_it++){
+    RCLCPP_INFO(this->get_logger().get_child(name_), "Report: %s with rate: %.2f", (*report_it).first.c_str(), (float)(*report_it).second.size()/(float)trajectories_->size());
+  }
+
   accepted_pose_arr.header.frame_id = perception_3d_ros_->getGlobalUtils()->getGblFrame();
   accepted_pose_arr.header.stamp = clock_->now();
   pub_accepted_trajectory_pose_array_->publish(accepted_pose_arr);

@@ -113,7 +113,12 @@ namespace base_trajectory {
        * @return The number of points in the trajectory
        */
       unsigned int getPointsSize() const;
-
+      
+      /**
+       * @brief  Return the string of the name who reject this trajectory
+       */
+       std::string rejected_by_;
+       
     private:
       nav_msgs::msg::Path trajectory_path_;
       // cuboid of trajectory pose

@@ -73,6 +73,8 @@ void StackedScoringModel::addPluginByTraj(std::string traj_name, std::shared_ptr
 }
 
 void StackedScoringModel::scoreTrajectory(std::string traj_gen_name, base_trajectory::Trajectory& one_traj){
+  
+  one_traj.rejected_by_ = "pass";
 
   for (std::vector<std::shared_ptr<ScoringModel> >::iterator model =  models_map_[traj_gen_name].begin(); model !=  models_map_[traj_gen_name].end();
        ++model)
@@ -82,6 +84,7 @@ void StackedScoringModel::scoreTrajectory(std::string traj_gen_name, base_trajec
     double return_cost = (*model)->scoreTrajectory(one_traj);
     if(return_cost<0){
       one_traj.cost_ = return_cost;
+      one_traj.rejected_by_ = (*model)->getModelName();
       break;
     }
     else{

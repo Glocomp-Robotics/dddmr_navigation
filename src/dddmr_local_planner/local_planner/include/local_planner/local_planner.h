@@ -165,6 +165,8 @@ class Local_Planner : public rclcpp::Node {
 
       rclcpp::Time control_loop_time_;
 
+      std::map<std::string, std::vector<base_trajectory::Trajectory>> rejected_trajectories_;
+
     protected:
 
       std::shared_ptr<tf2_ros::TransformListener> tfl_;
