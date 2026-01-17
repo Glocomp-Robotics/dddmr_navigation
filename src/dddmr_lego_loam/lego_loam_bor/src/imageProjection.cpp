@@ -163,7 +163,11 @@ ImageProjection::ImageProjection(std::string name, Channel<ProjectionOut>& outpu
   declare_parameter("imageProjection.ground_negative_stop", rclcpp::ParameterValue(0.0));
   this->get_parameter("imageProjection.ground_negative_stop", ground_negative_stop_);
   RCLCPP_INFO(this->get_logger(), "imageProjection.ground_negative_stop: %.6f", ground_negative_stop_);
-
+  
+  declare_parameter("imageProjection.ground_slope_tolerance", rclcpp::ParameterValue(0.174533));
+  this->get_parameter("imageProjection.ground_slope_tolerance", ground_slope_tolerance_);
+  RCLCPP_INFO(this->get_logger(), "imageProjection.ground_slope_tolerance: %.6f", ground_slope_tolerance_);
+  
   this->declare_parameter("imageProjection.trt_model_path", rclcpp::ParameterValue(""));
   this->get_parameter("imageProjection.trt_model_path", trt_model_path_);
   RCLCPP_INFO(this->get_logger(), "imageProjection.trt_model_path: %s" , trt_model_path_.c_str());
@@ -639,7 +643,7 @@ void ImageProjection::zPitchRollFeatureRemoval() {
         float dZg = upperInd_pt.z - lowerInd_pt.z;
 
         float vertical_angle = std::atan2(dZg , sqrt(dXg * dXg + dYg * dYg));
-        if ( fabs(vertical_angle - sensor_install_pitch_) > 20 * DEG_TO_RAD) {
+        if ( fabs(vertical_angle - sensor_install_pitch_) > ground_slope_tolerance_) {
           continue;
         }
         float ds = sqrt(dX*dX + dY*dY + dZ*dZ);

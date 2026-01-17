@@ -144,7 +144,8 @@ class ImageProjection : public rclcpp::Node
     double ground_positive_stop_;
     double ground_negative_start_;
     double ground_negative_stop_;
-
+    double ground_slope_tolerance_;
+    
 #ifdef TRT_ENABLED
     std::shared_ptr<YoloV8> yolov8_;
 #endif
