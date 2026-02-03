@@ -359,7 +359,13 @@ void ImageProjection::cloudHandler(
   std::vector<int> indices;
   _laser_cloud_in->is_dense = false;
   pcl::removeNaNFromPointCloud(*_laser_cloud_in, *_laser_cloud_in, indices);
-
+  
+  pc_valid_ = true;
+  if(_laser_cloud_in->points.size()<_vertical_scans*_horizontal_scans*0.8){
+    RCLCPP_ERROR(this->get_logger(), "Expecting: %lu points, but you only got %lu, check your lidar scan.", _vertical_scans*_horizontal_scans, _laser_cloud_in->points.size());
+    pc_valid_ = false;
+    return;
+  }
   //@if not stitch, save copy time
   pcl::PointCloud<PointType>::Ptr pcl_stitched_msg (new pcl::PointCloud<PointType>);
   if(stitcher_num_<=0){

@@ -41,6 +41,7 @@ class ImageProjection : public rclcpp::Node
     void tfInitial();
     
     bool to_fa_;
+    bool pc_valid_;
     std::string mapping_dir_string_;
 
   private:

@@ -1,7 +1,7 @@
 bag_reader:
   ros__parameters:
     use_sim_time: true
-    bag_file_dir: "/root/dddmr_bags/airy_stationary"
+    bag_file_dir: "/root/dddmr_bags/airy_ice"
     point_cloud_topic: "/airy_points"
     odometry_topic: "/odom"
     skip_frame: 1
@@ -25,7 +25,7 @@ lego_loam_ip:
         minimum_detection_range: 0.05
         maximum_detection_range: 60.0            # point cloud within this range will be used to project image
         distance_for_patch_between_rings: 1.0    # patch ground between rings within this range, i.e. ring0 and ring1 is smaller than 1 meter, patch them
-        stitcher_num: 0                          # for non-repetitive scan lidar use 2~4 (i.e. mid360)
+        stitcher_num: 3                          # for non-repetitive scan lidar use 2~4 (i.e. mid360)
         trt_model_path: ""                       # provide trt engine for yolo
         projected_image_stack_size: 1            # Stack this number of image for yolo11n to inference as time elapsed yolo (only work when TRT is loaded)
         patch_first_ring_to_baselink: false      

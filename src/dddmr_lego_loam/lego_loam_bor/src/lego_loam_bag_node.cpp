@@ -202,6 +202,9 @@ int main(int argc, char** argv) {
       msg.header.stamp = zero_time_stamp;
       BR->raw_point_cloud_pub_->publish(msg);
       IP->cloudHandler(laserCloudMsg);
+      if(!IP->pc_valid_){
+        continue;
+      }
       bool FA_ready = FA->systemInitedLM; //This line should come before FA->runFeatureAssociation()
       FA->runFeatureAssociation();
       nav_msgs::msg::Odometry::SharedPtr mapping_odom;
