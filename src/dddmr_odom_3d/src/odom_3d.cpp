@@ -64,7 +64,7 @@ void GenericDriveOdom::init(){
   //based on the pub_timer
   dt_ = 1.0/output_frequency_; 
   
-  odom_3d_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("odom_3d",rclcpp::QoS(rclcpp::KeepLast(1)).durability_volatile().reliable());
+  odom_3d_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("odom",rclcpp::QoS(rclcpp::KeepLast(1)).durability_volatile().reliable());
 
   sub_odom_ = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, rclcpp::QoS(rclcpp::KeepLast(1)).durability_volatile().best_effort(),
