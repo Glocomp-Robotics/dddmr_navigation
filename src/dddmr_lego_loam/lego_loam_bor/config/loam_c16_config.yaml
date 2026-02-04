@@ -1,6 +1,6 @@
 lego_loam_ip:
   ros__parameters:
-    use_sim_time: false
+    use_sim_time: true
     # leishen16
     laser:
         odom_type: "wheel_odometry"         #wheel_odometry/laser_odometry 
