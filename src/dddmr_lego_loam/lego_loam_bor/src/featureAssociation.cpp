@@ -774,7 +774,8 @@ void FeatureAssociation::findCorrespondingSurfFeatures(int iterCount) {
   for (int i = 0; i < surfPointsFlatNum; i++) {
     PointType pointSel;
     TransformToStart(&surfPointsFlat->points[i], &pointSel);
-
+    if(!pcl::isFinite(pointSel))
+      continue;
     if (iterCount % 5 == 0) {
       kdtreeSurfLast.nearestKSearch(pointSel, 1, pointSearchInd,
                                      pointSearchSqDis);

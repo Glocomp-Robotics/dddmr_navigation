@@ -843,9 +843,9 @@ void ImageProjection::zPitchRollFeatureRemoval() {
     }
     
     //@ we have ring edge, mark intensity for those edge points
-    size_t ringEdgeInd = j + (ring_edge-1)*_horizontal_scans;
+    size_t ringEdgeInd = j + (ring_edge)*_horizontal_scans;
     PointType a_pt = _full_cloud->points[ringEdgeInd];
-    a_pt.intensity = 100;
+    a_pt.intensity = 1000;
     patched_ground_edge_->push_back(a_pt);
 
     if(patch_first_ring_to_baselink_ && do_patch && first_frame_processed_<5 && closest_ring_edge < _vertical_scans-1){
@@ -878,7 +878,7 @@ void ImageProjection::zPitchRollFeatureRemoval() {
   std::vector<int> tmp_indices, tmp_indices2;
   pcl::removeNaNFromPointCloud(*patched_ground_, *patched_ground_, tmp_indices);
   pcl::removeNaNFromPointCloud(*patched_ground_edge_, *patched_ground_edge_, tmp_indices2);
-
+  
   dsf_patched_ground_.setInputCloud(patched_ground_);
   dsf_patched_ground_.filter(*patched_ground_);
   dsf_patched_ground_.setInputCloud(patched_ground_edge_);

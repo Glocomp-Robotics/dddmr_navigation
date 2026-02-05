@@ -1417,6 +1417,8 @@ void MapOptimization::cornerOptimization(int iterCount) {
   for (size_t i = 0; i < laserCloudCornerLastDS->points.size(); i++) {
     pointOri = laserCloudCornerLastDS->points[i];
     pointAssociateToMap(&pointOri, &pointSel);
+    if(!pcl::isFinite(pointSel))
+      continue;
     kdtreeCornerFromMap.nearestKSearch(pointSel, 5, pointSearchInd,
                                         pointSearchSqDis);
 
@@ -1533,6 +1535,8 @@ void MapOptimization::surfOptimization(int iterCount) {
   for (size_t i = 0; i < laserCloudSurfTotalLastDS->points.size(); i++) {
     pointOri = laserCloudSurfTotalLastDS->points[i];
     pointAssociateToMap(&pointOri, &pointSel);
+    if(!pcl::isFinite(pointSel))
+      continue;
     kdtreeSurfFromMap.nearestKSearch(pointSel, 5, pointSearchInd,
                                       pointSearchSqDis);
     if (pointSearchSqDis[4] < 1.0) {
