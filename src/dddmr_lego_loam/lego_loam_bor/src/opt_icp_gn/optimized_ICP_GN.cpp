@@ -106,6 +106,8 @@ float OptimizedICPGN::GetFitnessScore(float max_range) const {
     int nr = 0;
 
     for (unsigned int i = 0; i < transformed_cloud_ptr->size(); ++i) {
+        if(!pcl::isFinite(transformed_cloud_ptr->points[i]))
+        continue;
         kdtree_flann_ptr_->nearestKSearch(transformed_cloud_ptr->points[i], 1, nn_indices, nn_dists);
 
         if (nn_dists.front() <= max_range) {
