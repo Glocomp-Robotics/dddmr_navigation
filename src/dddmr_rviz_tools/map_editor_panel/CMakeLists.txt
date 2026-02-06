@@ -27,6 +27,10 @@ find_package(rviz_common REQUIRED)
 
 find_package(sensor_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+
 
 find_package(PCL REQUIRED COMPONENTS filters common io)
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
@@ -94,6 +98,9 @@ ament_target_dependencies(${PROJECT_NAME}
         rviz_common
         sensor_msgs
         pcl_conversions
+        tf2
+        tf2_ros
+        tf2_geometry_msgs
         )
 
 # Causes the visibility macros to use dllexport rather than dllimport,
@@ -114,6 +121,9 @@ ament_export_dependencies(
         rclcpp
         sensor_msgs
         pcl_conversions
+        tf2
+        tf2_ros
+        tf2_geometry_msgs
 )
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
