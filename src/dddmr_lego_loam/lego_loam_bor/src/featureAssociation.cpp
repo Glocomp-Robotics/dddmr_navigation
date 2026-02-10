@@ -201,6 +201,7 @@ void FeatureAssociation::tfInitial(){
 void FeatureAssociation::odomHandler(const nav_msgs::msg::Odometry::SharedPtr odomIn){
   
   odom_topic_alive_ = true;
+  wheelOdometry = (*odomIn);
 
   if(!odom_tf_alive_ && odom_tf_detect_number_<3){
 
@@ -211,7 +212,7 @@ void FeatureAssociation::odomHandler(const nav_msgs::msg::Odometry::SharedPtr od
       trans_o2b = tf2Buffer_->lookupTransform(
           odomIn->header.frame_id, odomIn->child_frame_id, tf2::TimePointZero);
       odom_tf_alive_ = true;
-      RCLCPP_INFO(this->get_logger(), "Detect %s to %s TF, MO will not broadcast from %s to %s.", odomIn->child_frame_id.c_str(), baselink_frame_.c_str(), odomIn->child_frame_id.c_str(), baselink_frame_.c_str());
+      RCLCPP_INFO(this->get_logger(), "Detect %s to %s TF, MO will not broadcast from %s to %s.", odomIn->header.frame_id.c_str(), baselink_frame_.c_str(), odomIn->header.frame_id.c_str(), baselink_frame_.c_str());
     }
     catch (tf2::TransformException& e)
     {
@@ -220,7 +221,7 @@ void FeatureAssociation::odomHandler(const nav_msgs::msg::Odometry::SharedPtr od
     
   }
 
-  wheelOdometry = (*odomIn);
+  
   if(odom_type_!="wheel_odometry"){
     return;
   }
@@ -1586,7 +1587,6 @@ void FeatureAssociation::runFeatureAssociation() {
     out.trans_b2s = projection.trans_b2s;
     out.trans_m2ci = projection.trans_m2ci;
     out.wheel_odometry = wheelOdometry;
-    out.broadcast_odom_tf = !odom_tf_alive_;
     _output_channel.send(std::move(out));
   }
   
