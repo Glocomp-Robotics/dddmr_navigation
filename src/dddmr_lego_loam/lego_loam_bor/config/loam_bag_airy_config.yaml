@@ -16,7 +16,7 @@ lego_loam_ip:
         num_horizontal_scans: 400
         vertical_angle_bottom: 0.0          # degrees
         vertical_angle_top: 90.0            # degrees
-        scan_period: 0.1                   # seconds
+        scan_period: 0.0                   # seconds
 
     imageProjection:
         segment_valid_point_num: 5
@@ -66,4 +66,4 @@ lego_loam_mo:
         history_keyframe_fitness_score: 0.2
         
         ground_voxel_size: 0.3
-        ground_edge_threshold_num: 50
+        ground_edge_threshold_num: 8
