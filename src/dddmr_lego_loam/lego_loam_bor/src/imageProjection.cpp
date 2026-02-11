@@ -794,9 +794,9 @@ void ImageProjection::zPitchRollFeatureRemoval() {
         double dz_left2right = fabs(lowerInd_left_pt_no_pitch.z - lowerInd_right_pt_no_pitch.z);
 
         if(!valid_point || dz_left>0.05 || dz_right>0.05 || dz_left2right>0.05){
-          //do_patch = false;
+          do_patch = false;
           //_segmented_cloud_pure->push_back(_full_cloud->points[lowerInd]);
-          //continue;
+          continue;
         }
 
         if(i<closest_ring_edge) //we dont casting the last one
