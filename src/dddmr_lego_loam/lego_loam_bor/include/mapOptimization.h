@@ -362,7 +362,7 @@ class MapOptimization : public rclcpp::Node
   int ground_edge_threshold_num_;
 
   std::vector<bool> ground_edge_processed_;
-  bool broadcast_odom_tf_;
+  bool broadcast_external_odom_tf_;
   bool has_m2ci_af3_;
   size_t current_ground_size_;
   

@@ -140,7 +140,7 @@ class ImageProjection : public rclcpp::Node
     std::deque<cv::Mat> projected_image_queue_;
     
     double sensor_install_pitch_;
-    double ground_slope_tolerance_, ground_dz_tolerance_, distance_from_lidar2_ground_;
+    double ground_slope_tolerance_, ground_dz_tolerance_;
     
     bool patch_first_ring_to_baselink_;
 

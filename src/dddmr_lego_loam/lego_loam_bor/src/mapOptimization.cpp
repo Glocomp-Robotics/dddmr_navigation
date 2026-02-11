@@ -134,6 +134,10 @@ MapOptimization::MapOptimization(std::string name,
   this->get_parameter("mapping.ground_edge_threshold_num", ground_edge_threshold_num_);
   RCLCPP_INFO(this->get_logger(), "mapping.ground_edge_threshold_num: %d", ground_edge_threshold_num_);
 
+  declare_parameter("mapping.broadcast_external_odom_tf", rclcpp::ParameterValue(true));
+  this->get_parameter("mapping.broadcast_external_odom_tf", broadcast_external_odom_tf_);
+  RCLCPP_INFO(this->get_logger(), "mapping.broadcast_external_odom_tf: %d", broadcast_external_odom_tf_);
+  
   allocateMemory();
 
   timer_run_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -674,7 +678,7 @@ void MapOptimization::publishTF() {
   map2odom.transform.translation.z = tf2_trans_m2o.getOrigin().z();
   tf_broadcaster_->sendTransform(map2odom);
 
-  if(broadcast_odom_tf_){
+  if(broadcast_external_odom_tf_){
     geometry_msgs::msg::TransformStamped odom2baselink;
     odom2baselink.header.stamp = map2odom.header.stamp;
     odom2baselink.header.frame_id = map2odom.child_frame_id;
@@ -2067,7 +2071,7 @@ void MapOptimization::run() {
   tf2_trans_m2ci_.setOrigin(tf2::Vector3(association.trans_m2ci.transform.translation.x, association.trans_m2ci.transform.translation.y, association.trans_m2ci.transform.translation.z));
   has_m2ci_af3_ = true;
   wheelOdometry = association.wheel_odometry;
-  broadcast_odom_tf_ = association.broadcast_odom_tf;
+  
   
   pcl::transformPointCloud(*association.cloud_patched_ground_last, *laserCloudPatchedGroundLast, trans_c2s_af3_);
   pcl::transformPointCloud(*association.cloud_patched_ground_edge_last, *laserCloudPatchedGroundEdgeLast, trans_c2s_af3_);
@@ -2118,7 +2122,6 @@ void MapOptimization::runWoLO(){
   tf2_trans_b2s_.setOrigin(tf2::Vector3(association.trans_b2s.transform.translation.x, association.trans_b2s.transform.translation.y, association.trans_b2s.transform.translation.z));
   has_m2ci_af3_ = true;
   wheelOdometry = association.wheel_odometry;
-  broadcast_odom_tf_ = association.broadcast_odom_tf;
 
   pcl::transformPointCloud(*association.cloud_patched_ground_last, *laserCloudPatchedGroundLast, trans_c2s_af3_);
   pcl::transformPointCloud(*association.cloud_patched_ground_edge_last, *laserCloudPatchedGroundEdgeLast, trans_c2s_af3_);
