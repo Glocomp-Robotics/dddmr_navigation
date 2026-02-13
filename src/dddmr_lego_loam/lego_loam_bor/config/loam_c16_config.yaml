@@ -3,12 +3,12 @@ lego_loam_ip:
     use_sim_time: true
     # leishen16
     laser:
-        odom_type: "wheel_odometry"         #wheel_odometry/laser_odometry 
+        odom_type: "laser_odometry"         #wheel_odometry/laser_odometry 
         baselink_frame: "base_link"
-        num_vertical_scans: 1800
-        num_horizontal_scans: 32
-        vertical_angle_bottom: -15.0          # degrees
-        vertical_angle_top: 15.0            # degrees
+        num_vertical_scans: 32
+        num_horizontal_scans: 900
+        vertical_angle_bottom: -30.0          # degrees
+        vertical_angle_top: 30.0            # degrees
         scan_period: 0.1                   # seconds
 
     imageProjection:
@@ -21,10 +21,7 @@ lego_loam_ip:
         stitcher_num: 0                          # for non-repetitive scan lidar use 2~4 (i.e. mid360)
         trt_model_path: ""                       # provide trt engine for yolo
         projected_image_stack_size: 1            # Stack this number of image for yolo11n to inference as time elapsed yolo (only work when TRT is loaded)
-        ground_slope_tolerance: 0.34
-        ground_dz_tolerance: 0.1
-        patch_first_ring_to_baselink: true
-
+        
         ground_fov_bottom: -0.2617994 # -15deg
         ground_fov_top: -0.087266 # -5deg
         ground_positive_start: 0.0
@@ -59,4 +56,5 @@ lego_loam_mo:
         history_keyframe_fitness_score: 0.5
         
         ground_voxel_size: 0.3
+        ground_edge_threshold_num: 50
         ground_edge_threshold_num: 50
