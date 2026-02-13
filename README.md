@@ -39,6 +39,24 @@ cd /tmp/pcl && sudo mkdir build && cd build && sudo cmake -DPCL_ENABLE_AVX=OFF -
 cd /tmp && sudo git clone https://github.com/AprilRobotics/apriltag.git && cd apriltag && sudo git checkout 3806edf38ac4400153677e510c9f9dcb81f472c8 && sudo cmake -B build -DCMAKE_BUILD_TYPE=Release && sudo cmake --build build --target install
 ```
 
+## Usage
+Run your tfs and odom then run the following to create a map
+```
+ros2 launch lego_loam_bor lego_loam_b2.launch
+```
+and
+```
+ros2 service call /save_mapped_point_cloud std_srvs/srv/Empty
+```
+to save it(Its will be saved in /tmp)
+
+For navigation and localisation(Edit the config and launch to change maps and params):
+```
+ros2 launch p2p_move_base p2p_move_base_localization.launch
+```
+
+
+
 ## 🚀 Now we have a dog!
 <p align='center'>
     <img src="https://github.com/dfl-rlab/dddmr_documentation_materials/blob/main/dddmr_navigation/lite3_down_obstacle_avoidance.gif" width="700" height="420"/>
