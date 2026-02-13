@@ -2,11 +2,11 @@ p2p_move_base:
   ros__parameters:
     use_sim_time: true
     controller_frequency: 10.0
-    planner_patience: 20.0
+    planner_patience: 10.0
     oscillation_distance: 5.0
     oscillation_angle: 1.0
     oscillation_patience: 15.0
-    controller_patience: 20.0
+    controller_patience: 10.0
     no_plan_retry_num: 10
     waiting_patience: 10.0
 global_plan_manager:
@@ -23,8 +23,8 @@ mcl_ip:
         baselink_frame: "base_link"
         num_vertical_scans: 32
         num_horizontal_scans: 900
-        vertical_angle_bottom: -15.0          # degrees
-        vertical_angle_top: 15.0            # degrees
+        vertical_angle_bottom: -55.0          # degrees
+        vertical_angle_top: 55.0            # degrees
         scan_period: 0.1                   # seconds
 
 
@@ -165,7 +165,7 @@ recovery_behaviors:
     rotate_inplace:
       plugin: "recovery_behaviors::RotateInPlaceBehavior"
       frequency: 10.0
-      tolerance: 0.6
+      tolerance: 1.0
       trajectory_generator_name: "differential_drive_rotate_inplace"
 
 trajectory_generators:
