@@ -203,14 +203,14 @@ trajectory_generators:
     differential_drive_simple:
       plugin: "trajectory_generators::DDSimpleTrajectoryGeneratorTheory"
       max_vel_x: 1.0
-      min_vel_x: 0.1 #0.1 This value should not be negative, because we want to customize backward behavior
+      min_vel_x: 0.4 #0.1 This value should not be negative, because we want to customize backward behavior
       max_vel_theta: 0.6
       min_vel_theta: 0.15
       acc_lim_x: 1.0
       acc_lim_theta: 3.0
       deceleration_ratio: 2.0
       max_motor_shaft_rpm: 3000.0
-      wheel_diameter: 0.16
+      wheel_diameter: 0.225
       gear_ratio: 1.0
       robot_radius: 0.25
       
