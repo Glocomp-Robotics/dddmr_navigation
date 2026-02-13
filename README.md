@@ -1,5 +1,43 @@
 # 🤖 dddmr_navigation
 
+## Glocomp Specific Changes
+-> Added params for imu and odom topics for odom3s node so you can change your odom and imu topics
+-> Added lego_loam_b2.launch specifically for Glocomp B2
+
+## Installation instructions
+```
+sudo apt-get install -y apt-utils && apt-get install -y curl gnupg2 && apt-get install -y lsb-release && apt-get clean all
+sudo apt-get install -y iputils-ping net-tools htop build-essential
+sudo apt install -y zip
+sudo apt install -y libmetis-dev
+sudo apt install -y python3-pip
+sudo apt install -y libopencv-dev python3-opencv
+sudo apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+sudo apt install -y libfreeimage-dev
+sudo apt install -y gdb
+sudo apt install -y ros-humble-apriltag-msgs
+```
+
+
+```
+# Gtsam install
+cd /tmp && sudo git clone https://github.com/borglab/gtsam.git && cd gtsam && sudo git checkout 4.2a9
+cd /tmp/gtsam && sudo mkdir build && cd build && sudo cmake -DCMAKE_BUILD_TYPE=Release -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_USE_SYSTEM_METIS=ON -DPCL_ENABLE_MARCHNATIVE=OFF .. && sudo make install -j$(nproc)
+```
+
+```
+# Pcl install
+sudo apt install -y libpcap-dev
+sudo apt install -y libusb-1.0-0-dev
+cd /tmp && sudo git clone https://github.com/PointCloudLibrary/pcl.git && cd pcl && sudo git checkout pcl-1.15.0
+cd /tmp/pcl && sudo mkdir build && cd build && sudo cmake -DPCL_ENABLE_AVX=OFF -DPCL_ENABLE_SSE=OFF -DPCL_ENABLE_MARCHNATIVE=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && sudo make install -j$(nproc)
+```
+
+```
+#install apriltag
+cd /tmp && sudo git clone https://github.com/AprilRobotics/apriltag.git && cd apriltag && sudo git checkout 3806edf38ac4400153677e510c9f9dcb81f472c8 && sudo cmake -B build -DCMAKE_BUILD_TYPE=Release && sudo cmake --build build --target install
+```
+
 ## 🚀 Now we have a dog!
 <p align='center'>
     <img src="https://github.com/dfl-rlab/dddmr_documentation_materials/blob/main/dddmr_navigation/lite3_down_obstacle_avoidance.gif" width="700" height="420"/>
