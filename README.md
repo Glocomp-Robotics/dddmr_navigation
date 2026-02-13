@@ -2,6 +2,7 @@
 
 ## Glocomp Specific Changes
 -> Added params for imu and odom topics for odom3s node so you can change your odom and imu topics
+
 -> Added lego_loam_b2.launch specifically for Glocomp B2
 
 ## Installation instructions
