@@ -1,6 +1,7 @@
 p2p_move_base:
   ros__parameters:
-    controller_frequency: 20.0
+    use_sim_time: true
+    controller_frequency: 10.0
     planner_patience: 10.0
     oscillation_distance: 5.0
     oscillation_angle: 1.0
@@ -11,15 +12,17 @@ p2p_move_base:
 global_plan_manager:
   ros__parameters:
     global_planner_action_name: "get_dwa_plan"
-    global_plan_query_frequency: 2.0
+    global_plan_query_frequency: 5.0
 
 mcl_ip:
   ros__parameters:
+    use_sim_time: true
+    # leishen16
     laser:
-        odom_type: "wheel_odometry"         #wheel_odometry/laser_odometry 
+        odom_type: "laser_odometry"         #wheel_odometry/laser_odometry 
         baselink_frame: "base_link"
-        num_vertical_scans: 16
-        num_horizontal_scans: 440
+        num_vertical_scans: 32
+        num_horizontal_scans: 900
         vertical_angle_bottom: -15.0          # degrees
         vertical_angle_top: 15.0            # degrees
         scan_period: 0.1                   # seconds
@@ -42,24 +45,26 @@ mcl_ip:
         ground_positive_stop: 3.1415926
         ground_negative_start: 0.0
         ground_negative_stop: -3.1415926
+        
 mcl_fa:
   ros__parameters:
+    use_sim_time: true
+
     featureAssociation:
         edge_threshold: 0.1
         surf_threshold: 0.1
         nearest_feature_search_distance: 3.0
-    mapping:
-        to_map_optimization: false
-                
+        
 sub_maps:
   ros__parameters:
-    pose_graph_dir: "/root/dddmr_bags/gz_go2_demo_world"
+    use_sim_time: true
+    pose_graph_dir: "/home/unitree/dddmr_bags/Glocomp_lobby"
     sub_map_search_radius: 50.0
     sub_map_warmup_trigger_distance: 20.0
     complete_map_voxel_size: 0.4
-
 mcl_3dl:
   ros__parameters:
+    use_sim_time: true
     init_x: 0.0
     init_y: 0.0
     init_z: 0.0
@@ -132,14 +137,15 @@ mcl_3dl:
 
 local_planner:
   ros__parameters:
+    use_sim_time: true
     odom_topic: odom
     forward_prune: 3.0
     backward_prune: 1.0
     heading_tracking_distance: 0.5
     heading_align_angle: 0.5
     prune_plane_timeout: 3.0
-    xy_goal_tolerance: 1.0
-    yaw_goal_tolerance: 0.785
+    xy_goal_tolerance: 0.3
+    yaw_goal_tolerance: 0.3
     controller_frequency: 10.0
     
     cuboid:
@@ -154,6 +160,7 @@ local_planner:
 
 recovery_behaviors:
   ros__parameters:
+    use_sim_time: true
     plugins: ["rotate_inplace"]
     rotate_inplace:
       plugin: "recovery_behaviors::RotateInPlaceBehavior"
@@ -163,6 +170,7 @@ recovery_behaviors:
 
 trajectory_generators:
   ros__parameters:
+    use_sim_time: true
     plugins: ["differential_drive_simple", "differential_drive_rotate_inplace", "differential_drive_rotate_shortest_angle"]
     differential_drive_rotate_shortest_angle:
       plugin: "trajectory_generators::DDRotateInplaceTheory"
@@ -194,11 +202,11 @@ trajectory_generators:
     
     differential_drive_simple:
       plugin: "trajectory_generators::DDSimpleTrajectoryGeneratorTheory"
-      max_vel_x: 1.2
-      min_vel_x: 0.25 #0.1 This value should not be negative, because we want to customize backward behavior
+      max_vel_x: 1.0
+      min_vel_x: 0.1 #0.1 This value should not be negative, because we want to customize backward behavior
       max_vel_theta: 0.6
-      min_vel_theta: 0.25
-      acc_lim_x: 3.0
+      min_vel_theta: 0.15
+      acc_lim_x: 1.0
       acc_lim_theta: 3.0
       deceleration_ratio: 2.0
       max_motor_shaft_rpm: 3000.0
@@ -207,9 +215,9 @@ trajectory_generators:
       robot_radius: 0.25
       
       controller_frequency: 10.0
-      sim_time: 1.0
+      sim_time: 2.0
       linear_x_sample: 5.0
-      angular_z_sample: 8.0
+      angular_z_sample: 10.0
       sim_granularity: 0.05
       angular_sim_granularity: 0.025
 
@@ -225,6 +233,7 @@ trajectory_generators:
 
 mpc_critics:
   ros__parameters:
+    use_sim_time: true
     plugins: ["collision", "stick_path", "pure_pursuit", "toward_global_plan", "collision_rotate", "collision_rotate_shortest", "prefer_rotate_shortest"]
     collision:
       plugin: "mpc_critics::CollisionModel"
@@ -258,6 +267,7 @@ mpc_critics:
 
 perception_3d_local:
   ros__parameters:
+    use_sim_time: true
     global_frame: "map"
     robot_base_frame: "base_link"
     max_obstacle_distance: 9999.0
@@ -295,6 +305,7 @@ perception_3d_local:
 
 perception_3d_global:
   ros__parameters:
+    use_sim_time: true
     global_frame: "map"
     robot_base_frame: "base_link"
     max_obstacle_distance: 9999.0
@@ -310,7 +321,7 @@ perception_3d_global:
       use_adaptive_connection: false #If true: the neighbors of node is sparse, it will automatically increase search radius.
       adaptive_connection_number: 20
       radius_of_ground_connection: 1.5 #If use_adaptive_connection=false, the radius search of the node is applied.
-      intensity_search_radius: 3.0 #this value is suggested to be 1.0 meters, because if it is too large, the narrow passage will be miscalculated
+      intensity_search_radius: 1.0 #this value is suggested to be 1.0 meters, because if it is too large, the narrow passage will be miscalculated
       intensity_search_punish_weight: 0.1 #the weight for a node. Set this value higher means we dont like path planning cross a orphan node.
       static_imposing_radius: 1.5 #use map to add weight on each ground node
       map_topic: "mapcloud"
@@ -345,12 +356,15 @@ perception_3d_global:
 
 global_planner:
   ros__parameters:
+    use_sim_time: true
     turning_weight: 0.1 #Punish the zig-zag path
     enable_detail_log: false
+    a_star_expanding_radius: 0.5
 
 #if we use get_dwa_plan in global_plan_manager, we setup parameters for dwa_global_planner
 dynamic_window_aware_global_planner:
   ros__parameters:
+    use_sim_time: true
     look_ahead_distance: 2.0
     recompute_frequency: 10.0
     
