@@ -194,6 +194,10 @@ ImageProjection::ImageProjection(std::string name, Channel<ProjectionOut>& outpu
   this->get_parameter("imageProjection.ground_slope_tolerance", ground_slope_tolerance_);
   RCLCPP_INFO(this->get_logger(), "imageProjection.ground_slope_tolerance: %.6f", ground_slope_tolerance_);
 
+  declare_parameter("imageProjection.ground_dz_tolerance", rclcpp::ParameterValue(0.1));
+  this->get_parameter("imageProjection.ground_dz_tolerance", ground_dz_tolerance_);
+  RCLCPP_INFO(this->get_logger(), "imageProjection.ground_dz_tolerance: %.6f", ground_dz_tolerance_);
+
   declare_parameter("imageProjection.patch_first_ring_to_baselink", rclcpp::ParameterValue(true));
   this->get_parameter("imageProjection.patch_first_ring_to_baselink", patch_first_ring_to_baselink_);
   RCLCPP_INFO(this->get_logger(), "imageProjection.patch_first_ring_to_baselink: %d", patch_first_ring_to_baselink_);
@@ -715,13 +719,13 @@ void ImageProjection::zPitchRollFeatureRemoval() {
         PointType lowerInd_left_pt_no_pitch;
         PointType lowerInd_right_pt_no_pitch;
         bool valid_point = false;
-        size_t horizontal_search_number = 50;
+        size_t horizontal_search_number = 20;
         if(j<horizontal_search_number){
           lowerInd_pt_no_pitch = _full_cloud_no_pitch[lowerInd];
           for(int jj=1;jj<horizontal_search_number;jj++){
             size_t compensateInd = 0;
-            if(lowerInd-jj<0){
-              compensateInd = lowerInd-jj+_horizontal_scans;
+            if(lowerInd<jj){
+              compensateInd = _horizontal_scans+lowerInd-jj;
             }
             else{
               compensateInd = lowerInd-jj;
@@ -791,7 +795,7 @@ void ImageProjection::zPitchRollFeatureRemoval() {
 
         if(!valid_point || dz_left>0.05 || dz_right>0.05 || dz_left2right>0.05){
           do_patch = false;
-          _segmented_cloud_pure->push_back(_full_cloud->points[lowerInd]);
+          //_segmented_cloud_pure->push_back(_full_cloud->points[lowerInd]);
           continue;
         }
 
@@ -809,7 +813,7 @@ void ImageProjection::zPitchRollFeatureRemoval() {
         float dZg = upperInd_pt_no_pitch.z - lowerInd_pt_no_pitch.z;
 
         float vertical_angle = std::atan2(dZg , sqrt(dXg * dXg + dYg * dYg));
-        if ( fabs(vertical_angle) > ground_slope_tolerance_ && fabs(dZg)>0.03) {
+        if ( fabs(vertical_angle) > ground_slope_tolerance_ && fabs(dZg)>ground_dz_tolerance_) {
           do_patch = false;
           _segmented_cloud_pure->push_back(_full_cloud->points[lowerInd]);
           continue;
@@ -838,7 +842,8 @@ void ImageProjection::zPitchRollFeatureRemoval() {
         }
       }
       else{
-        _segmented_cloud_pure->push_back(_full_cloud->points[lowerInd]);
+        if(i>0)
+          _segmented_cloud_pure->push_back(_full_cloud->points[lowerInd]);
       }
     }
     
@@ -910,6 +915,10 @@ void ImageProjection::cloudSegmentation() {
         if (_ground_mat(i, j) == 1) {
           if (j % 5 != 0 && j > 5 && j < _horizontal_scans - 5) continue;
         }
+        // remove nan
+
+        if(!pcl::isFinite(_full_cloud->points[j + i * _horizontal_scans]))
+          continue;
         // mark ground points so they will not be considered as edge features
         // later
         _seg_msg.segmented_cloud_ground_flag[sizeOfSegCloud] =
@@ -1046,7 +1055,7 @@ void ImageProjection::publishClouds() {
 
   //PublishCloud(_pub_outlier_cloud, _outlier_cloud);
   //PublishCloud(_pub_segmented_cloud, _segmented_cloud);
-  PublishCloud(_pub_ground_cloud, _z_pitch_roll_decisive_feature_cloud);
+  PublishCloud(_pub_ground_cloud, patched_ground_);
   PublishCloud(_pub_segmented_cloud_pure, _segmented_cloud_pure);
   //PublishCloud(_pub_full_info_cloud, _full_info_cloud);
   if (_pub_segmented_cloud_info->get_subscription_count() != 0) {

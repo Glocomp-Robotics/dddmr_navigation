@@ -1,7 +1,7 @@
 bag_reader:
   ros__parameters:
     use_sim_time: true
-    bag_file_dir: "/root/dddmr_bags/weiwuyin_back_side"
+    bag_file_dir: "/root/dddmr_bags/meydan_hotel"
     point_cloud_topic: "/lslidar_point_cloud"
     odometry_topic: "/odom"
     skip_frame: 2
@@ -29,6 +29,9 @@ lego_loam_ip:
         stitcher_num: 0                          # for non-repetitive scan lidar use 2~4 (i.e. mid360)
         trt_model_path: ""                       # provide trt engine for yolo
         projected_image_stack_size: 1            # Stack this number of image for yolo11n to inference as time elapsed yolo (only work when TRT is loaded)
+        ground_slope_tolerance: 0.34
+        ground_dz_tolerance: 0.1
+        patch_first_ring_to_baselink: true
         
         ground_fov_bottom: -0.2617994 # -15deg
         ground_fov_top: -0.087266 # -5deg
@@ -56,7 +59,7 @@ lego_loam_mo:
         distance_between_key_frame: 1.0
         angle_between_key_frame: 1.0
 
-        enable_loop_closure: true
+        enable_loop_closure: false
 
         surrounding_keyframe_search_num: 20
         history_keyframe_search_radius: 12.0

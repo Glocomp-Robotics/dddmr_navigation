@@ -134,6 +134,10 @@ MapOptimization::MapOptimization(std::string name,
   this->get_parameter("mapping.ground_edge_threshold_num", ground_edge_threshold_num_);
   RCLCPP_INFO(this->get_logger(), "mapping.ground_edge_threshold_num: %d", ground_edge_threshold_num_);
 
+  declare_parameter("mapping.broadcast_external_odom_tf", rclcpp::ParameterValue(true));
+  this->get_parameter("mapping.broadcast_external_odom_tf", broadcast_external_odom_tf_);
+  RCLCPP_INFO(this->get_logger(), "mapping.broadcast_external_odom_tf: %d", broadcast_external_odom_tf_);
+  
   allocateMemory();
 
   timer_run_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -674,7 +678,7 @@ void MapOptimization::publishTF() {
   map2odom.transform.translation.z = tf2_trans_m2o.getOrigin().z();
   tf_broadcaster_->sendTransform(map2odom);
 
-  if(broadcast_odom_tf_){
+  if(broadcast_external_odom_tf_){
     geometry_msgs::msg::TransformStamped odom2baselink;
     odom2baselink.header.stamp = map2odom.header.stamp;
     odom2baselink.header.frame_id = map2odom.child_frame_id;
@@ -1280,22 +1284,22 @@ void MapOptimization::groundEdgeDetectionThread() {
   for(auto i=pointSearchInd.begin();i!=pointSearchInd.end();i++)
   {  
     //RCLCPP_INFO(this->get_logger(), "%.2f, %.2f, %.2f", cloudKeyPoses6D->points[*i].x, cloudKeyPoses6D->points[*i].y, cloudKeyPoses6D->points[*i].z);
-    if(fabs(current_processing_ground_edge_num.y-cloudKeyPoses6D->points[*i].y)<1.0)
+    if(fabs(current_processing_ground_edge_num.y-cloudKeyPoses6D->points[*i].y)<1.0){
       *patched_ground += *transformPointCloud(patchedGroundKeyFrames[*i], &cloudKeyPoses6D->points[*i]);
+    }
   }
   
-  //RCLCPP_INFO(this->get_logger(),">>>>>>%lu", patched_ground->points.size());
-
   //@ generate ground kdtree for edge to search
-  //pcl::transformPointCloud(*patched_ground, *patched_ground, trans_m2ci_af3_);
   pcl::VoxelGrid<PointType> ds_patched_ground;
   ds_patched_ground.setLeafSize(0.1, 0.5, 0.1); //we are in camera frame, z pointing to moving direction, y pointing to sky 
   ds_patched_ground.setInputCloud(patched_ground);
   ds_patched_ground.filter(*patched_ground);
   pcl::KdTreeFLANN<PointType> kdtree_ground;
   kdtree_ground.setInputCloud(patched_ground);
-
+  
+  //@ reprocess old edge frame, because we had new ground information, so new edge will be pushed back to keypose frames
   pcl::PointCloud<PointType>::Ptr patched_ground_edge_camera_frame;
+  
   pointSearchInd.clear();
   pointSearchSqDis.clear();
   kdtree_key_pose.radiusSearch(current_processing_ground_edge_num, 5.0, pointSearchInd, pointSearchSqDis);
@@ -1304,6 +1308,10 @@ void MapOptimization::groundEdgeDetectionThread() {
     if(fabs(current_processing_ground_edge_num.y - cloudKeyPoses3D->points[*i].y)>1.0){
       continue;
     }
+    
+    if((*i)>=patchedGroundEdgeProcessedKeyFrames.size())
+      continue;
+
     pcl::PointCloud<PointType>::Ptr processed_ground_edge_last;
     processed_ground_edge_last.reset(new pcl::PointCloud<PointType>());
     patched_ground_edge_camera_frame.reset(new pcl::PointCloud<PointType>());
@@ -1326,16 +1334,13 @@ void MapOptimization::groundEdgeDetectionThread() {
           //double dy = patched_ground->points[index].y - patched_ground_edge_camera_frame->points[j].y;
           double dz = patched_ground->points[index].z - patched_ground_edge_camera_frame->points[j].z;
           double distance = sqrt(dx*dx+dz*dz);
-          patched_ground->points[index].intensity = 1000.0/(1.0+distance);
+          patched_ground->points[index].intensity = 100.0/(1.0+distance);
           processed_ground_edge_last->push_back(patched_ground->points[index]);
         }
         
       }
 
     }
-
-    if((*i)>=patchedGroundEdgeProcessedKeyFrames.size())
-      continue;
 
     pcl::VoxelGrid<PointType> ds_processed_ground_edge_last;
     ds_processed_ground_edge_last.setLeafSize(0.1, 0.2, 0.1); //we are in camera frame, z pointing to moving direction, y pointing to sky 
@@ -1345,7 +1350,7 @@ void MapOptimization::groundEdgeDetectionThread() {
     patchedGroundEdgeProcessedKeyFrames[*i] = processed_ground_edge_last;
   
   }
-
+  
   //@ process current frame
   pcl::PointCloud<PointType>::Ptr processed_ground_edge_current;
   processed_ground_edge_current.reset(new pcl::PointCloud<PointType>());
@@ -2067,7 +2072,7 @@ void MapOptimization::run() {
   tf2_trans_m2ci_.setOrigin(tf2::Vector3(association.trans_m2ci.transform.translation.x, association.trans_m2ci.transform.translation.y, association.trans_m2ci.transform.translation.z));
   has_m2ci_af3_ = true;
   wheelOdometry = association.wheel_odometry;
-  broadcast_odom_tf_ = association.broadcast_odom_tf;
+  
   
   pcl::transformPointCloud(*association.cloud_patched_ground_last, *laserCloudPatchedGroundLast, trans_c2s_af3_);
   pcl::transformPointCloud(*association.cloud_patched_ground_edge_last, *laserCloudPatchedGroundEdgeLast, trans_c2s_af3_);
@@ -2118,7 +2123,6 @@ void MapOptimization::runWoLO(){
   tf2_trans_b2s_.setOrigin(tf2::Vector3(association.trans_b2s.transform.translation.x, association.trans_b2s.transform.translation.y, association.trans_b2s.transform.translation.z));
   has_m2ci_af3_ = true;
   wheelOdometry = association.wheel_odometry;
-  broadcast_odom_tf_ = association.broadcast_odom_tf;
 
   pcl::transformPointCloud(*association.cloud_patched_ground_last, *laserCloudPatchedGroundLast, trans_c2s_af3_);
   pcl::transformPointCloud(*association.cloud_patched_ground_edge_last, *laserCloudPatchedGroundEdgeLast, trans_c2s_af3_);

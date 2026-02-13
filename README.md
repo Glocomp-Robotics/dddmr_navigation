@@ -1,5 +1,12 @@
 # 🤖 dddmr_navigation
 
+## 🚀 Now we have a dog!
+<p align='center'>
+    <img src="https://github.com/dfl-rlab/dddmr_documentation_materials/blob/main/dddmr_navigation/lite3_down_obstacle_avoidance.gif" width="700" height="420"/>
+</p>
+
+---
+
 ## 🚀 Big update!
 We’ve just integrated a Gazebo models using Unitree-go2 with the DDDMR Navigation Stack, unlocking true 3D navigation for simulation and testing. Using the latest quadruped robots go2 combined with our advanced stack, you can explore navigation capabilities that go far beyond traditional 2D navigation frameworks.
 
@@ -10,19 +17,6 @@ We’ve just integrated a Gazebo models using Unitree-go2 with the DDDMR Navigat
 <p align='center'>
     <img src="https://github.com/dfl-rlab/dddmr_documentation_materials/blob/main/dddmr_beginner_guide/3d_nav_gz.gif" width="700" height="420"/>
 </p>
-
----
-
-## 🚀 We have released robosense airy example
-<table align='center'>
-  <tr width="100%">
-    <td width="40%"><img src="https://github.com/dfl-rlab/dddmr_documentation_materials/blob/main/dddmr_lego_loam_bor/airy_configuration.png" width="400" height="260"/><p align='center'>Airy as the belly button!?</p></td>
-    <td width="40%"><img src="https://github.com/dfl-rlab/dddmr_documentation_materials/blob/main/dddmr_lego_loam_bor/robosense_airy_dddmr_lego_loam.gif" width="400" height="260"/><p align='center'>DDDMR SLAM</p></td>
-  </tr>
-</table>
-
-[👾 Let's play airy using dddmr navigation](https://github.com/dfl-rlab/dddmr_navigation/tree/main/src/dddmr_lego_loam)
-
 
 ---
 

@@ -269,6 +269,7 @@ void MultiLayerSpinningLidar::cbSensor(const sensor_msgs::msg::PointCloud2::Shar
     //@ put to current observation, different for global/local
     Eigen::Affine3d trans_gbl2b_af3 = tf2::transformToEigen(trans_gbl2b_);
     pcl::transformPointCloud(*pcl_msg_, *pcl_msg_, trans_gbl2b_af3);
+    pcl_msg_->header.frame_id = gbl_utils_->getGblFrame();
     pcl::copyPointCloud(*pcl_msg_, *sensor_current_observation_);
   }
 
@@ -277,7 +278,6 @@ void MultiLayerSpinningLidar::cbSensor(const sensor_msgs::msg::PointCloud2::Shar
 
   if(pub_current_observation_->get_subscription_count()>0){
     sensor_msgs::msg::PointCloud2 ros_pc2_msg;
-    pcl_msg_->header.frame_id = gbl_utils_->getRobotFrame();
     pcl::toROSMsg(*pcl_msg_, ros_pc2_msg);
     pub_current_observation_->publish(ros_pc2_msg);
   }
