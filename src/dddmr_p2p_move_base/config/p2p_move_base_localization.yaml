@@ -125,7 +125,7 @@ mcl_3dl:
 
     bias_var_dist: 2.0
     bias_var_ang: 1.57
-    tf_tolerance: 0.1
+    tf_tolerance: 0.5
     publish_tf: true
 
     likelihood:
@@ -144,8 +144,8 @@ local_planner:
     heading_tracking_distance: 0.5
     heading_align_angle: 0.5
     prune_plane_timeout: 3.0
-    xy_goal_tolerance: 0.3
-    yaw_goal_tolerance: 0.3
+    xy_goal_tolerance: 0.6
+    yaw_goal_tolerance: 0.6
     controller_frequency: 10.0
     
     cuboid:
@@ -165,7 +165,7 @@ recovery_behaviors:
     rotate_inplace:
       plugin: "recovery_behaviors::RotateInPlaceBehavior"
       frequency: 10.0
-      tolerance: 0.3
+      tolerance: 0.6
       trajectory_generator_name: "differential_drive_rotate_inplace"
 
 trajectory_generators:
